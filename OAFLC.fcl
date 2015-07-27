@@ -1,0 +1,128 @@
+FUNCTION_BLOCK obstacles
+ 
+    VAR_INPUT
+        LeftDistance :     REAL; (* RANGE( 100 .. 550) *)
+        RightDistance:     REAL; (* RANGE( 100 .. 550) *)
+        FrontDistance:     REAL; (* RANGE( 100 .. 550) *)
+    END_VAR
+ 
+    VAR_OUTPUT
+        LeftVelocity : REAL; (* RANGE(-50 .. 251) *)
+        RightVelocity : REAL; (* RANGE(-50 .. 251) *)
+    END_VAR
+ 
+    FUZZIFY LeftDistance
+        TERM Near := (100, 0) (175, 1) (250,0) ; 
+        TERM Medium := (200, 0) (300, 1) (400,0); 
+        TERM Far :=  (300, 0) (425,1) (550,0);   
+    END_FUZZIFY
+ 
+    FUZZIFY RightDistance
+        TERM Near := (100, 0) (175, 1) (250,0) ; 
+        TERM Medium := (200, 0) (300, 1) (400,0); 
+        TERM Far :=  (300, 0) (425,1) (550,0); 
+    END_FUZZIFY
+    
+    FUZZIFY FrontDistance
+        TERM Near := (100, 0) (175, 1) (250,0) ; 
+        TERM Medium := (200, 0) (300, 1) (400,0); 
+        TERM Far :=  (300, 0) (425,1) (550,0);  
+    END_FUZZIFY
+ 
+
+    DEFUZZIFY LeftVelocity
+
+        TERM Negative :=  (-50,0) (-25,1) (0,0) ;
+
+        TERM Positive := (0,0) (25,1) (50,0) ;
+        TERM HighPositive := (0,0) (50,1) (100,0) ;
+        TERM VeryHighPositive:= (100,0) (150,1) (200,0) ;
+        ACCU:MAX;
+        METHOD: COG;(*MoM;*)
+        DEFAULT := 0;
+    END_DEFUZZIFY
+    
+ 
+    DEFUZZIFY RightVelocity
+
+        TERM Negative :=  (-50,0) (-25,1) (0,0) ;
+
+        TERM Positive := (0,0) (25,1) (50,0) ;
+        TERM HighPositive := (0,0) (50,1) (100,0) ;
+        TERM VeryHighPositive:= (100,0) (150,1) (200,0) ;
+        ACCU:MAX;
+        METHOD: COG;(*MoM;*)
+        DEFAULT := 0;
+    END_DEFUZZIFY
+ 
+    RULEBLOCK leftVel
+        AND:MIN;
+        (*ACCU:MAX;*)
+        RULE 0: IF (LeftDistance IS Near)    AND (FrontDistance IS Near)   AND (RightDistance IS Near)   THEN (LeftVelocity IS Positive) ;
+        RULE 1: IF (LeftDistance IS Near)    AND (FrontDistance IS Near)   AND (RightDistance IS Medium) THEN (LeftVelocity IS Positive) ;
+        RULE 2: IF (LeftDistance IS Near)    AND (FrontDistance IS Near)   AND (RightDistance IS Far)    THEN (LeftVelocity IS HighPositive) ;         
+        RULE 3: IF (LeftDistance IS Near)    AND (FrontDistance IS Medium) AND (RightDistance IS Near)   THEN (LeftVelocity IS Positive) ;
+        RULE 4: IF (LeftDistance IS Near)    AND (FrontDistance IS Medium) AND (RightDistance IS Medium) THEN (LeftVelocity IS HighPositive) ;
+        RULE 5: IF (LeftDistance IS Near)    AND (FrontDistance IS Medium) AND (RightDistance IS Far)    THEN (LeftVelocity IS HighPositive) ;      
+        RULE 6: IF (LeftDistance IS Near)    AND (FrontDistance IS Far)    AND (RightDistance IS Near)   THEN (LeftVelocity IS Positive) ;
+	RULE 7: IF (LeftDistance IS Near)    AND (FrontDistance IS Far)    AND (RightDistance IS Medium) THEN (LeftVelocity IS HighPositive) ;
+        RULE 8: IF (LeftDistance IS Near)    AND (FrontDistance IS Far)    AND (RightDistance IS Far)    THEN (LeftVelocity IS VeryHighPositive) ;
+        
+        RULE 9:  IF (LeftDistance IS Medium) AND (FrontDistance IS Near)   AND (RightDistance IS Near)   THEN (LeftVelocity IS Negative) ;
+        RULE 10: IF (LeftDistance IS Medium) AND (FrontDistance IS Near)   AND (RightDistance IS Medium) THEN (LeftVelocity IS Negative) ;
+        RULE 11: IF (LeftDistance IS Medium) AND (FrontDistance IS Near)   AND (RightDistance IS Far)    THEN (LeftVelocity IS Positive) ;        
+        RULE 12: IF (LeftDistance IS Medium) AND (FrontDistance IS Medium) AND (RightDistance IS Near)   THEN (LeftVelocity IS Negative) ;
+        RULE 13: IF (LeftDistance IS Medium) AND (FrontDistance IS Medium) AND (RightDistance IS Medium) THEN (LeftVelocity IS Positive) ; 
+        RULE 14: IF (LeftDistance IS Medium) AND (FrontDistance IS Medium) AND (RightDistance IS Far)    THEN (LeftVelocity IS HighPositive) ;        
+        RULE 15: IF (LeftDistance IS Medium) AND (FrontDistance IS Far)    AND (RightDistance IS Near)   THEN (LeftVelocity IS Negative) ;
+        RULE 16: IF (LeftDistance IS Medium) AND (FrontDistance IS Far)    AND (RightDistance IS Medium) THEN (LeftVelocity IS HighPositive) ;        
+        RULE 17: IF (LeftDistance IS Medium) AND (FrontDistance IS Far)    AND (RightDistance IS Far)    THEN (LeftVelocity IS HighPositive) ;
+        
+        RULE 18: IF (LeftDistance IS Far)    AND (FrontDistance IS Near)   AND (RightDistance IS Near)   THEN (LeftVelocity IS Negative) ;
+        RULE 19: IF (LeftDistance IS Far)    AND (FrontDistance IS Near)   AND (RightDistance IS Medium) THEN (LeftVelocity IS Negative) ;
+        RULE 20: IF (LeftDistance IS Far)    AND (FrontDistance IS Near)   AND (RightDistance IS Far)    THEN (LeftVelocity IS Negative) ;        
+        RULE 21: IF (LeftDistance IS Far)    AND (FrontDistance IS Medium) AND (RightDistance IS Near)   THEN (LeftVelocity IS Positive) ;
+        RULE 22: IF (LeftDistance IS Far)    AND (FrontDistance IS Medium) AND (RightDistance IS Medium) THEN (LeftVelocity IS Positive) ;
+        RULE 23: IF (LeftDistance IS Far)    AND (FrontDistance IS Medium) AND (RightDistance IS Far)    THEN (LeftVelocity IS Positive) ;    
+        RULE 24: IF (LeftDistance IS Far)    AND (FrontDistance IS Far)    AND (RightDistance IS Near)   THEN (LeftVelocity IS Negative) ;
+        RULE 25: IF (LeftDistance IS Far)    AND (FrontDistance IS Far)    AND (RightDistance IS Medium) THEN (LeftVelocity IS Positive) ;
+        RULE 26: IF (LeftDistance IS Far)    AND (FrontDistance IS Far)    AND (RightDistance IS Far)    THEN (LeftVelocity IS VeryHighPositive) ;
+          
+    END_RULEBLOCK    
+     RULEBLOCK rightVel
+        AND:MIN;
+        (*ACCU:MAX;*)
+        RULE 0: IF (LeftDistance IS Near)    AND (FrontDistance IS Near)   AND (RightDistance IS Near)   THEN (RightVelocity IS Negative) ;
+        RULE 1: IF (LeftDistance IS Near)    AND (FrontDistance IS Near)   AND (RightDistance IS Medium) THEN (RightVelocity IS Negative) ;
+	RULE 2: IF (LeftDistance IS Near)    AND (FrontDistance IS Near)   AND (RightDistance IS Far)    THEN (RightVelocity IS Negative) ;	
+        RULE 3: IF (LeftDistance IS Near)    AND (FrontDistance IS Medium) AND (RightDistance IS Near)   THEN (RightVelocity IS Positive) ;
+        RULE 4: IF (LeftDistance IS Near)    AND (FrontDistance IS Medium) AND (RightDistance IS Medium) THEN (RightVelocity IS Positive) ;
+	RULE 5: IF (LeftDistance IS Near)    AND (FrontDistance IS Medium) AND (RightDistance IS Far)    THEN (RightVelocity IS Positive) ;	
+	RULE 6: IF (LeftDistance IS Near)    AND (FrontDistance IS Far)    AND (RightDistance IS Near)   THEN (RightVelocity IS Positive) ;
+	RULE 7: IF (LeftDistance IS Near)    AND (FrontDistance IS Far)    AND (RightDistance IS Medium) THEN (RightVelocity IS Positive) ;
+        RULE 8: IF (LeftDistance IS Near)    AND (FrontDistance IS Far)    AND  (RightDistance IS Far)   THEN (RightVelocity IS HighPositive) ;
+        
+        RULE 9:  IF (LeftDistance IS Medium) AND (FrontDistance IS Near)   AND (RightDistance IS Near)   THEN (RightVelocity IS Positive) ;
+	RULE 10: IF (LeftDistance IS Medium) AND (FrontDistance IS Near)   AND (RightDistance IS Medium) THEN (RightVelocity IS Positive) ;
+        RULE 11: IF (LeftDistance IS Medium) AND (FrontDistance IS Near)   AND (RightDistance IS Far)    THEN (RightVelocity IS Negative) ;
+        RULE 12: IF (LeftDistance IS Medium) AND (FrontDistance IS Medium) AND (RightDistance IS Near)   THEN (RightVelocity IS Positive) ;
+        RULE 13: IF (LeftDistance IS Medium) AND (FrontDistance IS Medium) AND (RightDistance IS Medium) THEN (RightVelocity IS Positive) ;        
+        RULE 14: IF (LeftDistance IS Medium) AND (FrontDistance IS Medium) AND (RightDistance IS Far)    THEN (RightVelocity IS Positive) ;        
+        RULE 15: IF (LeftDistance IS Medium) AND (FrontDistance IS Far)    AND (RightDistance IS Near)   THEN (RightVelocity IS Positive) ;
+        RULE 16: IF (LeftDistance IS Medium) AND (FrontDistance IS Far)    AND (RightDistance IS Medium) THEN (RightVelocity IS HighPositive) ;
+        RULE 17: IF (LeftDistance IS Medium) AND (FrontDistance IS Far)    AND (RightDistance IS Far)    THEN (RightVelocity IS Positive) ;
+                
+        RULE 18: IF (LeftDistance IS Far)    AND (FrontDistance IS Near)   AND (RightDistance IS Near)   THEN (RightVelocity IS Positive) ;
+        RULE 19: IF (LeftDistance IS Far)    AND (FrontDistance IS Near)   AND (RightDistance IS Medium) THEN (RightVelocity IS Positive) ;
+        RULE 20: IF (LeftDistance IS Far)    AND (FrontDistance IS Near)   AND (RightDistance IS Far)    THEN (RightVelocity IS Positive) ;        
+        RULE 21: IF (LeftDistance IS Far)    AND (FrontDistance IS Medium) AND (RightDistance IS Near)   THEN (RightVelocity IS HighPositive) ;
+        RULE 22: IF (LeftDistance IS Far)    AND (FrontDistance IS Medium) AND (RightDistance IS Medium) THEN (RightVelocity IS HighPositive) ;
+        RULE 23: IF (LeftDistance IS Far)    AND (FrontDistance IS Medium) AND (RightDistance IS Far)    THEN (RightVelocity IS HighPositive) ;         
+        RULE 24: IF (LeftDistance IS Far)    AND (FrontDistance IS Far)    AND (RightDistance IS Near)   THEN (RightVelocity IS Positive) ;         
+        RULE 25: IF (LeftDistance IS Far)    AND (FrontDistance IS Far)    AND (RightDistance IS Medium) THEN (RightVelocity IS HighPositive) ;
+        RULE 26: IF (LeftDistance IS Far)    AND (FrontDistance IS Far)    AND (RightDistance IS Far)    THEN (RightVelocity IS VeryHighPositive) ;
+          
+
+    END_RULEBLOCK
+ 
+END_FUNCTION_BLOCK

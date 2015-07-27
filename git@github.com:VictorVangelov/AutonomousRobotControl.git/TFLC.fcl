@@ -1,0 +1,129 @@
+FUNCTION_BLOCK dummy
+ 
+    VAR_INPUT
+        ErrorAngle :     REAL; (* RANGE(-180 .. 180) *)
+        Distance:    	 REAL; (* RANGE(0 .. 700) *)
+    END_VAR
+ 
+    VAR_OUTPUT
+        LeftVelocity : REAL; (* RANGE(0 .. 300) *)
+        RightVelocity : REAL; (* RANGE(0 .. 300) *)
+    END_VAR
+ 
+    FUZZIFY ErrorAngle
+       TERM Negative := (-180,1) (-45, 0) ; 
+       TERM SmallNegative :=  (-90, 0) (-45, 1) (0, 0);
+	   TERM Zero := (-45,0) (0, 1) (45, 0) ;
+       TERM SmallPositive :=  (0, 0) (45, 1) (90, 0)  ;
+       TERM Positive := (45, 0)(180 ,1)  ;
+        
+    END_FUZZIFY
+ 
+    FUZZIFY Distance
+        TERM Zero := (0, 1) (50, 0); 
+        TERM Near := (0, 0) (50, 1) (100, 0) ;
+        TERM Medium := (50, 0) (100, 1) (150, 0) ;
+        TERM Far := (100, 0) (200, 1) (300, 0) ;
+        TERM VeryFar := (200, 0) (300, 1) (700,1) ;
+    END_FUZZIFY
+ 
+    DEFUZZIFY LeftVelocity
+        TERM Zero := 0 ; 
+        TERM Slow :=  50  ;
+	TERM Medium := 100 ;
+        TERM High :=  150  ;
+        TERM VeryHigh := 200  ;
+        ACCU:MAX;
+        METHOD: COGS;(*MoM;*)
+        DEFAULT := 0;
+    END_DEFUZZIFY
+    
+ 
+    DEFUZZIFY RightVelocity
+        TERM Zero := 0 ; 
+        TERM Slow :=  50  ;
+	    TERM Medium := 100 ;
+        TERM High :=  150  ;
+        TERM VeryHigh := 200 ;
+        ACCU:MAX;
+        METHOD: COGS;(*MoM;*)
+        DEFAULT := 0;
+    END_DEFUZZIFY
+ 
+    RULEBLOCK leftVel
+    
+        AND:MIN;        
+        (*ACCU:MAX;*)
+        RULE 0: IF (Distance IS Zero) AND (ErrorAngle IS Negative) THEN (LeftVelocity IS Zero) ;
+        RULE 1: IF (Distance IS Zero) AND (ErrorAngle IS SmallNegative) THEN (LeftVelocity IS Zero) ;
+        RULE 2: IF (Distance IS Zero) AND (ErrorAngle IS Zero) THEN (LeftVelocity IS Zero) ;
+        RULE 3: IF (Distance IS Zero) AND (ErrorAngle IS SmallPositive) THEN (LeftVelocity IS Slow) ;
+        RULE 4: IF (Distance IS Zero) AND (ErrorAngle IS Positive) THEN (LeftVelocity IS Slow);  
+        
+        RULE 5: IF (Distance IS Near) AND (ErrorAngle IS Negative) THEN (LeftVelocity IS Zero) ;
+        RULE 6: IF (Distance IS Near) AND (ErrorAngle IS SmallNegative) THEN (LeftVelocity IS Zero) ;
+        RULE 7: IF (Distance IS Near) AND (ErrorAngle IS Zero) THEN (LeftVelocity IS Slow) ;
+        RULE 8: IF (Distance IS Near) AND (ErrorAngle IS SmallPositive) THEN (LeftVelocity IS Slow) ;
+        RULE 9: IF (Distance IS Near) AND (ErrorAngle IS Positive) THEN (LeftVelocity IS Slow) ;   
+        
+        RULE 10: IF (Distance IS Medium) AND (ErrorAngle IS Negative) THEN (LeftVelocity IS Zero) ;
+        RULE 11: IF (Distance IS Medium) AND (ErrorAngle IS SmallNegative) THEN (LeftVelocity IS Zero) ;
+        RULE 12: IF (Distance IS Medium) AND (ErrorAngle IS Zero) THEN (LeftVelocity IS Medium) ;
+        RULE 13: IF (Distance IS Medium) AND (ErrorAngle IS SmallPositive) THEN (LeftVelocity IS Slow) ;
+        RULE 14: IF (Distance IS Medium) AND (ErrorAngle IS Positive) THEN (LeftVelocity IS Slow);
+        
+        RULE 15: IF (Distance IS Far) AND (ErrorAngle IS Negative) THEN (LeftVelocity IS Zero) ;
+        RULE 16: IF (Distance IS Far) AND (ErrorAngle IS SmallNegative) THEN (LeftVelocity IS Zero);
+        RULE 17: IF (Distance IS Far) AND (ErrorAngle IS Zero) THEN (LeftVelocity IS High) ;
+        RULE 18: IF (Distance IS Far) AND (ErrorAngle IS SmallPositive) THEN (LeftVelocity IS Slow) ;
+        RULE 19: IF (Distance IS Far) AND (ErrorAngle IS Positive) THEN (LeftVelocity IS Slow) ;
+        
+        RULE 20: IF (Distance IS VeryFar) AND (ErrorAngle IS Negative) THEN (LeftVelocity IS Zero) ;
+        RULE 21: IF (Distance IS VeryFar) AND (ErrorAngle IS SmallNegative) THEN (LeftVelocity IS Zero);
+        RULE 22: IF (Distance IS VeryFar) AND (ErrorAngle IS Zero) THEN (LeftVelocity IS VeryHigh) ;
+        RULE 23: IF (Distance IS VeryFar) AND (ErrorAngle IS SmallPositive) THEN (LeftVelocity IS Slow);
+        RULE 24: IF (Distance IS VeryFar) AND (ErrorAngle IS Positive) THEN (LeftVelocity IS Slow) ;
+      
+    END_RULEBLOCK    
+    
+
+
+     RULEBLOCK rightVel
+     
+        AND:MIN;
+        (*ACCU:MAX;*)
+        RULE 0: IF (Distance IS Zero) AND (ErrorAngle IS Negative) THEN (RightVelocity IS Slow) ;
+        RULE 1: IF (Distance IS Zero) AND (ErrorAngle IS SmallNegative) THEN (RightVelocity IS Slow) ;
+        RULE 2: IF (Distance IS Zero) AND (ErrorAngle IS Zero) THEN (RightVelocity IS Zero) ;
+        RULE 3: IF (Distance IS Zero) AND (ErrorAngle IS SmallPositive) THEN (RightVelocity IS Zero) ;
+        RULE 4: IF (Distance IS Zero) AND (ErrorAngle IS Positive) THEN (RightVelocity IS Zero);  
+        
+        RULE 5: IF (Distance IS Near) AND (ErrorAngle IS Negative) THEN (RightVelocity IS Slow) ;
+        RULE 6: IF (Distance IS Near) AND (ErrorAngle IS SmallNegative) THEN (RightVelocity IS Slow) ;
+        RULE 7: IF (Distance IS Near) AND (ErrorAngle IS Zero) THEN (RightVelocity IS Slow) ;
+        RULE 8: IF (Distance IS Near) AND (ErrorAngle IS SmallPositive) THEN (RightVelocity IS Zero) ;
+        RULE 9: IF (Distance IS Near) AND (ErrorAngle IS Positive) THEN (RightVelocity IS Zero) ;   
+        
+        RULE 10: IF (Distance IS Medium) AND (ErrorAngle IS Negative) THEN (RightVelocity IS Slow) ;
+        RULE 11: IF (Distance IS Medium) AND (ErrorAngle IS SmallNegative) THEN (RightVelocity IS Slow) ;
+        RULE 12: IF (Distance IS Medium) AND (ErrorAngle IS Zero) THEN (RightVelocity IS Medium) ;
+        RULE 13: IF (Distance IS Medium) AND (ErrorAngle IS SmallPositive) THEN (RightVelocity IS Zero) ;
+        RULE 14: IF (Distance IS Medium) AND (ErrorAngle IS Positive) THEN (RightVelocity IS Zero);
+        
+        RULE 15: IF (Distance IS Far) AND (ErrorAngle IS Negative) THEN (RightVelocity IS Slow) ;
+        RULE 16: IF (Distance IS Far) AND (ErrorAngle IS SmallNegative) THEN (RightVelocity IS Slow);
+        RULE 17: IF (Distance IS Far) AND (ErrorAngle IS Zero) THEN (RightVelocity IS High) ;
+        RULE 18: IF (Distance IS Far) AND (ErrorAngle IS SmallPositive) THEN (RightVelocity IS Zero) ;
+        RULE 19: IF (Distance IS Far) AND (ErrorAngle IS Positive) THEN (RightVelocity IS Zero) ;
+        
+        RULE 20: IF (Distance IS VeryFar) AND (ErrorAngle IS Negative) THEN (RightVelocity IS Slow) ;
+        RULE 21: IF (Distance IS VeryFar) AND (ErrorAngle IS SmallNegative) THEN (RightVelocity IS Slow);
+        RULE 22: IF (Distance IS VeryFar) AND (ErrorAngle IS Zero) THEN (RightVelocity IS VeryHigh) ;
+        RULE 23: IF (Distance IS VeryFar) AND (ErrorAngle IS SmallPositive) THEN (RightVelocity IS Zero);
+        RULE 24: IF (Distance IS VeryFar) AND (ErrorAngle IS Positive) THEN (RightVelocity IS Zero) ;
+      
+    END_RULEBLOCK
+ 
+END_FUNCTION_BLOCK
+
+
