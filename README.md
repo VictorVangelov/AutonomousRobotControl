@@ -1,0 +1,2 @@
+“Autonomous mobile robot control and obstacle avoidance using fuzzy logic”. The project is developed on programming language Python and includes python's fuzzy logic toolbox for calculating the speed and angle control for the robot using data about  the surrounding environment from multiple sensors.
+Using Adept MobileRobots interface for robot control(ARIA) and pyFuzzy for calculating velocities for robot wheels
